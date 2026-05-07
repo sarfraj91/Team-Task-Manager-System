@@ -1,0 +1,123 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 213 34% 9%;
+    --foreground: 34 44% 96%;
+    --card: 214 32% 12%;
+    --card-foreground: 34 44% 96%;
+    --surface: 214 29% 14%;
+    --primary: 173 72% 45%;
+    --primary-foreground: 213 34% 9%;
+    --secondary: 214 26% 18%;
+    --secondary-foreground: 34 44% 96%;
+    --muted: 214 21% 16%;
+    --muted-foreground: 214 18% 72%;
+    --accent: 33 95% 62%;
+    --accent-foreground: 213 34% 9%;
+    --danger: 0 76% 58%;
+    --danger-foreground: 34 44% 98%;
+    --border: 214 20% 24%;
+    --input: 214 23% 18%;
+    --ring: 173 72% 45%;
+  }
+
+  .light {
+    --background: 36 38% 97%;
+    --foreground: 215 34% 16%;
+    --card: 0 0% 100%;
+    --card-foreground: 215 34% 16%;
+    --surface: 34 36% 94%;
+    --primary: 173 72% 36%;
+    --primary-foreground: 36 38% 97%;
+    --secondary: 35 32% 91%;
+    --secondary-foreground: 215 34% 16%;
+    --muted: 35 24% 93%;
+    --muted-foreground: 215 16% 42%;
+    --accent: 31 90% 55%;
+    --accent-foreground: 36 38% 97%;
+    --danger: 0 72% 48%;
+    --danger-foreground: 36 38% 97%;
+    --border: 34 22% 84%;
+    --input: 34 25% 92%;
+    --ring: 173 72% 36%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    background-image:
+      radial-gradient(circle at top left, rgba(20, 184, 166, 0.18), transparent 28%),
+      radial-gradient(circle at 88% 10%, rgba(251, 191, 36, 0.12), transparent 22%),
+      radial-gradient(circle at 50% 100%, rgba(56, 189, 248, 0.1), transparent 24%),
+      linear-gradient(180deg, rgba(11, 23, 37, 0.97), rgba(8, 14, 24, 1));
+    min-height: 100vh;
+  }
+
+  .light body {
+    background-image:
+      radial-gradient(circle at top left, rgba(20, 184, 166, 0.12), transparent 28%),
+      radial-gradient(circle at 88% 10%, rgba(251, 191, 36, 0.14), transparent 20%),
+      radial-gradient(circle at 50% 100%, rgba(56, 189, 248, 0.08), transparent 24%),
+      linear-gradient(180deg, rgba(252, 248, 241, 1), rgba(245, 239, 229, 1));
+  }
+
+  ::selection {
+    @apply bg-primary/40 text-foreground;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply rounded-3xl border border-white/10 bg-white/5 shadow-glass backdrop-blur-2xl;
+  }
+
+  .light .glass-panel {
+    border-color: rgba(230, 220, 201, 0.95);
+    background-color: rgba(255, 255, 255, 0.8);
+  }
+
+  .section-shell {
+    @apply glass-panel p-5 md:p-6;
+  }
+
+  .headline {
+    @apply font-display text-balance;
+  }
+
+  .surface-panel {
+    @apply rounded-[28px] border border-white/10 bg-black/10 backdrop-blur-xl;
+  }
+
+  .light .surface-panel {
+    border-color: rgba(230, 220, 201, 0.95);
+    background-color: rgba(255, 255, 255, 0.7);
+  }
+
+  .premium-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148, 163, 184, 0.5) transparent;
+  }
+
+  .grid-sheen {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .grid-sheen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent 20%, rgba(255, 255, 255, 0.08) 50%, transparent 80%);
+    transform: translateX(-100%);
+    animation: sheen 4.5s linear infinite;
+    pointer-events: none;
+  }
+}
