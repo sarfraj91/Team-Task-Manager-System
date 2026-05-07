@@ -41,7 +41,7 @@ app.use(sanitizeMiddleware)
 app.use(morgan(env.nodeEnv === "production" ? "combined" : "dev"))
 app.use("/uploads", express.static(uploadsPath))
 
-app.get("/api/health", (_req, res) => {
+app.get("/", (_req, res) => {
   res.json({
     success: true,
     message: "TaskFlow Pro API is healthy"
@@ -54,6 +54,7 @@ app.use("/api/projects", projectRoutes)
 app.use("/api/tasks", taskRoutes)
 app.use("/api/users", userRoutes)
 app.use("/api/workspaces", workspaceRoutes)
+
 
 if (fs.existsSync(clientBuildPath)) {
   app.use(express.static(clientBuildPath))
