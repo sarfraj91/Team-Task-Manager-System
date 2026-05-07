@@ -41,13 +41,6 @@ app.use(sanitizeMiddleware)
 app.use(morgan(env.nodeEnv === "production" ? "combined" : "dev"))
 app.use("/uploads", express.static(uploadsPath))
 
-app.get("/", (_req, res) => {
-  res.json({
-    success: true,
-    message: "TaskFlow Pro API is healthy"
-  })
-})
-
 app.use("/api/auth", authRoutes)
 app.use("/api/dashboard", dashboardRoutes)
 app.use("/api/projects", projectRoutes)
@@ -66,6 +59,13 @@ if (fs.existsSync(clientBuildPath)) {
     return res.sendFile(path.join(clientBuildPath, "index.html"))
   })
 }
+
+app.get("/", (_req, res) => {
+  res.json({
+    success: true,
+    message: "TaskFlow Pro API is healthy"
+  })
+})
 
 app.use(notFoundHandler)
 app.use(errorHandler)
