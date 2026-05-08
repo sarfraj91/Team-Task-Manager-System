@@ -1,51 +1,60 @@
-const nodemailer = require("nodemailer")
-const env = require("../config/env")
-const ApiError = require("../utils/ApiError")
+const nodemailer = require("nodemailer");
+const env = require("../config/env");
+const ApiError = require("../utils/ApiError");
 
-let transporter
+let transporter;
 
 const isEmailConfigured = Boolean(
-  env.smtpHost && env.smtpPort && env.smtpUser && env.smtpPass && env.smtpFromEmail
-)
+  env.smtpHost &&
+  env.smtpPort &&
+  env.smtpUser &&
+  env.smtpPass &&
+  env.smtpFromEmail,
+);
 
 const getTransporter = () => {
   if (!isEmailConfigured) {
-    throw new ApiError(503, "SMTP email service is not configured")
+    throw new ApiError(503, "SMTP email service is not configured");
   }
 
   if (!transporter) {
     transporter = nodemailer.createTransport({
       host: env.smtpHost,
-      port: env.smtpPort,
-      secure: env.smtpSecure,
+      // port: env.smtpPort,
+      // secure: env.smtpSecure,
+      port: Number(env.smtpPort),
+      secure: env.smtpSecure === true || env.smtpSecure === "true",
       auth: {
         user: env.smtpUser,
-        pass: env.smtpPass
-      }
-    })
+        pass: env.smtpPass,
+      },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 10000,
+    });
   }
 
-  return transporter
-}
+  return transporter;
+};
 
 const sendMail = async ({ to, subject, html, text }) => {
-  const mailer = getTransporter()
+  const mailer = getTransporter();
   const from = env.smtpFromName
     ? `"${env.smtpFromName}" <${env.smtpFromEmail}>`
-    : env.smtpFromEmail
+    : env.smtpFromEmail;
 
   await mailer.sendMail({
     from,
     to,
     subject,
     html,
-    text
-  })
-}
+    text,
+  });
+};
 
 const sendVerificationOtpEmail = async ({ email, name, otp }) => {
-  const ttlMinutes = env.otpExpiresMinutes
-  const greetingName = name || "there"
+  const ttlMinutes = env.otpExpiresMinutes;
+  const greetingName = name || "there";
 
   await sendMail({
     to: email,
@@ -60,11 +69,11 @@ const sendVerificationOtpEmail = async ({ email, name, otp }) => {
         </div>
         <p style="margin: 0; color: #475569;">This code expires in ${ttlMinutes} minutes.</p>
       </div>
-    `
-  })
-}
+    `,
+  });
+};
 
 module.exports = {
   isEmailConfigured,
-  sendVerificationOtpEmail
-}
+  sendVerificationOtpEmail,
+};
