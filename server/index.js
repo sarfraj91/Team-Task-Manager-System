@@ -24,7 +24,17 @@ const uploadsPath = path.resolve(__dirname, "./uploads")
 
 app.use(
   cors({
-    origin: env.clientUrl.split(",").map((origin) => origin.trim()),
+    origin: function (origin, callback) {
+      const allowedOrigins = env.clientUrl
+        .split(",")
+        .map((origin) => origin.trim())
+
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true)
+      } else {
+        callback(new Error("Not allowed by CORS"))
+      }
+    },
     credentials: true
   })
 )
