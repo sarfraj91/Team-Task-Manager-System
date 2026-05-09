@@ -1,14 +1,17 @@
 const env = require("../config/env")
 const ApiError = require("../utils/ApiError")
 
-const isEmailConfigured = Boolean(env.resendApiKey && env.emailFrom)
+const isEmailConfigured = Boolean(env.brevoApiKey && env.emailFrom)
 
 const getFromAddress = () => {
   if (!env.emailFromName) {
-    return env.emailFrom
+    return { email: env.emailFrom }
   }
 
-  return `${env.emailFromName} <${env.emailFrom}>`
+  return {
+    name: env.emailFromName,
+    email: env.emailFrom
+  }
 }
 
 const sendMail = async ({ to, subject, html, text }) => {
@@ -16,18 +19,18 @@ const sendMail = async ({ to, subject, html, text }) => {
     throw new ApiError(503, "Email service is not configured")
   }
 
-  const response = await fetch("https://api.resend.com/emails", {
+  const response = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${env.resendApiKey}`,
+      "api-key": env.brevoApiKey,
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      from: getFromAddress(),
-      to,
+      sender: getFromAddress(),
+      to: [{ email: to }],
       subject,
-      html,
-      text
+      htmlContent: html,
+      textContent: text
     })
   })
 
