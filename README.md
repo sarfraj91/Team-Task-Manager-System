@@ -9,6 +9,7 @@ This project is designed to feel like a real startup product instead of a basic 
 ### Highlights
 
 - JWT access tokens + refresh token cookie flow
+- Email OTP verification during signup
 - Admin and member role permissions
 - Project creation, editing, membership management, and deletion
 - Task creation, updates, comments, attachments, and Kanban movement
@@ -41,6 +42,7 @@ This project is designed to feel like a real startup product instead of a basic 
 - JWT authentication
 - bcryptjs
 - express-validator
+- Brevo transactional email API for OTP delivery
 - Multer
 - Helmet
 - CORS
@@ -49,7 +51,9 @@ This project is designed to feel like a real startup product instead of a basic 
 
 ### Authentication
 
-- Register
+- Register with email OTP verification
+- Request another registration OTP
+- Verify registration OTP
 - Login
 - Logout
 - Persistent session bootstrap
@@ -125,10 +129,7 @@ Add screenshots after running the app locally or deploying it:
 
 ## Environment Variables
 
-Create these files from the included examples:
-
-- `client/.env` from `client/.env.example`
-- `server/.env` from `server/.env.example`
+Create these files locally:
 
 ### `server/.env`
 
@@ -143,6 +144,10 @@ JWT_EXPIRES_IN=15m
 JWT_REFRESH_EXPIRES_IN=7d
 COOKIE_SECURE=false
 UPLOADS_DIR=uploads
+OTP_EXPIRES_MINUTES=10
+BREVO_API_KEY=your_brevo_api_key
+EMAIL_FROM=your_verified_brevo_sender_email
+EMAIL_FROM_NAME=TaskFlow Pro
 DEMO_ADMIN_EMAIL=admin@taskflow.dev
 DEMO_ADMIN_PASSWORD=Admin123!
 DEMO_MEMBER_EMAIL=member@taskflow.dev
@@ -155,6 +160,20 @@ DEMO_MEMBER_PASSWORD=Member123!
 VITE_API_URL=http://localhost:5000/api
 VITE_APP_NAME=TaskFlow Pro
 ```
+
+### Email OTP Setup
+
+Signup uses Brevo's transactional email API to send verification OTPs. Create a Brevo account, generate an API key, and verify a sender email in Brevo. Use that verified sender in `EMAIL_FROM`.
+
+Do not use the old `SMTP_*` variables. The backend now expects:
+
+```env
+BREVO_API_KEY=your_brevo_api_key
+EMAIL_FROM=your_verified_brevo_sender_email
+EMAIL_FROM_NAME=TaskFlow Pro
+```
+
+The email service uses HTTPS through Node's built-in `fetch`, so no Nodemailer, SMTP port, or extra email SDK dependency is required.
 
 ## Installation
 
@@ -197,7 +216,9 @@ These are also configurable through `server/.env`:
 
 ### Auth
 
-- `POST /api/auth/register`
+- `POST /api/auth/register/request-otp`
+- `POST /api/auth/register/verify-otp`
+- `POST /api/auth/register/resend-otp`
 - `POST /api/auth/login`
 - `POST /api/auth/logout`
 - `GET /api/auth/refresh`
@@ -280,8 +301,23 @@ VITE_API_URL=/api
 - `JWT_SECRET`
 - `JWT_REFRESH_SECRET`
 - `CLIENT_URL`
+- `BREVO_API_KEY`
+- `EMAIL_FROM`
+- `EMAIL_FROM_NAME`
 - `NODE_ENV=production`
 - `COOKIE_SECURE=true`
+
+When deploying the frontend separately on Vercel, set the frontend API URL to your Railway backend API:
+
+```env
+VITE_API_URL=https://your-railway-backend-domain.up.railway.app/api
+```
+
+In Railway, set `CLIENT_URL` to your Vercel frontend origin:
+
+```env
+CLIENT_URL=https://your-vercel-app.vercel.app
+```
 
 ## Verification
 
