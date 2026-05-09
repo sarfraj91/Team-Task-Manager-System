@@ -1,60 +1,48 @@
-const nodemailer = require("nodemailer");
-const env = require("../config/env");
-const ApiError = require("../utils/ApiError");
+const env = require("../config/env")
+const ApiError = require("../utils/ApiError")
 
-let transporter;
+const isEmailConfigured = Boolean(env.resendApiKey && env.emailFrom)
 
-const isEmailConfigured = Boolean(
-  env.smtpHost &&
-  env.smtpPort &&
-  env.smtpUser &&
-  env.smtpPass &&
-  env.smtpFromEmail,
-);
-
-const getTransporter = () => {
-  if (!isEmailConfigured) {
-    throw new ApiError(503, "SMTP email service is not configured");
+const getFromAddress = () => {
+  if (!env.emailFromName) {
+    return env.emailFrom
   }
 
-  if (!transporter) {
-    transporter = nodemailer.createTransport({
-      host: env.smtpHost,
-      // port: env.smtpPort,
-      // secure: env.smtpSecure,
-      port: Number(env.smtpPort),
-      secure: env.smtpSecure === true || env.smtpSecure === "true",
-      auth: {
-        user: env.smtpUser,
-        pass: env.smtpPass,
-      },
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 10000,
-    });
-  }
-
-  return transporter;
-};
+  return `${env.emailFromName} <${env.emailFrom}>`
+}
 
 const sendMail = async ({ to, subject, html, text }) => {
-  const mailer = getTransporter();
-  const from = env.smtpFromName
-    ? `"${env.smtpFromName}" <${env.smtpFromEmail}>`
-    : env.smtpFromEmail;
+  if (!isEmailConfigured) {
+    throw new ApiError(503, "Email service is not configured")
+  }
 
-  await mailer.sendMail({
-    from,
-    to,
-    subject,
-    html,
-    text,
-  });
-};
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${env.resendApiKey}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      from: getFromAddress(),
+      to,
+      subject,
+      html,
+      text
+    })
+  })
+
+  if (!response.ok) {
+    const details = await response.json().catch(() => ({}))
+    throw new ApiError(
+      502,
+      details.message || details.error || "Email could not be sent"
+    )
+  }
+}
 
 const sendVerificationOtpEmail = async ({ email, name, otp }) => {
-  const ttlMinutes = env.otpExpiresMinutes;
-  const greetingName = name || "there";
+  const ttlMinutes = env.otpExpiresMinutes
+  const greetingName = name || "there"
 
   await sendMail({
     to: email,
@@ -69,11 +57,11 @@ const sendVerificationOtpEmail = async ({ email, name, otp }) => {
         </div>
         <p style="margin: 0; color: #475569;">This code expires in ${ttlMinutes} minutes.</p>
       </div>
-    `,
-  });
-};
+    `
+  })
+}
 
 module.exports = {
   isEmailConfigured,
-  sendVerificationOtpEmail,
-};
+  sendVerificationOtpEmail
+}
